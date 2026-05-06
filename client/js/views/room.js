@@ -165,8 +165,8 @@ const RoomView = {
         const code = store.room?.code;
         if (!code) return;
         
-        // 降级方案：HTTP 环境使用 textarea 复制
-        if (!navigator.clipboard || window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        // 降级方案：clipboard API 不可用时使用 textarea 复制
+        if (!navigator.clipboard) {
             const ta = document.createElement('textarea');
             ta.value = code;
             ta.style.position = 'fixed';
