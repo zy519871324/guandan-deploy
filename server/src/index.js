@@ -49,8 +49,8 @@ const corsOptions = {
             env.CLIENT_URL.replace('http://', 'https://'),
         ].filter(Boolean);
         if (allowed.some(function(u) { return origin === u; })) return cb(null, true);
-        // 允许同 IP 不同端口的访问（VPS 直接访问场景）
-        cb(null, true);
+        // 拒绝不在白名单的来源
+        cb(new Error('CORS 策略阻止了该来源: ' + origin));
     },
     credentials: true,
 };

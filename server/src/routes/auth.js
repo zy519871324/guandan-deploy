@@ -71,7 +71,7 @@ router.post('/login', async (req, res, next) => {
 router.post('/guest', (req, res, next) => {
     try {
         const baseName = req.body.username || '游客';
-        const uniqueName = `${baseName}${Math.floor(Math.random() * 9000) + 1000}`;
+        const uniqueName = `${baseName}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
         const userId = User.create({ username: uniqueName, isGuest: true });
         const token = signToken({ id: userId, username: uniqueName, isGuest: true });

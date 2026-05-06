@@ -374,12 +374,9 @@ class GameState {
             levelRank: this.getPlayerWildRank(userId),
             tributeInfo: this.tributeInfo ? {
                 type: this.tributeInfo.type,
-                tributes: this.tributeInfo.tributes.map(t => ({
-                    from: t.from,
-                    to: t.to,
-                    card: t.to === userId ? t.card : null,
-                })),
-                pendingReturns: this.tributeInfo.pendingReturns,
+                // 只返回与该玩家相关的进贡信息，避免泄露全局进贡链
+                myTribute: this.tributeInfo.tributes.find(t => t.from === userId || t.to === userId) || null,
+                needReturn: this.tributeInfo.pendingReturns ? this.tributeInfo.pendingReturns.includes(userId) : false,
             } : null,
         };
     }
