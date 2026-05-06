@@ -121,8 +121,11 @@ const GameView = {
             this._myIndex = state.players.findIndex(p => p.id === store.user.id);
         }
 
-        // 更新手牌
-        if (state.myHand) store.setHand(state.myHand);
+        // 更新手牌并预加载图片
+        if (state.myHand) {
+            store.setHand(state.myHand);
+            store.preloadImages(state.myHand);
+        }
 
         this._renderAll(state);
 

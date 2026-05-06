@@ -164,6 +164,25 @@ const RoomView = {
     _copyCode() {
         const code = store.room?.code;
         if (!code) return;
+        
+        // 降级方案：HTTP 环境使用 textarea 复制
+        if (!navigator.clipboard || window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            const ta = document.createElement('textarea');
+            ta.value = code;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                toast.success('房间码已复制');
+            } catch (err) {
+                toast.warning('复制失败，请手动复制: ' + code);
+            }
+            document.body.removeChild(ta);
+            return;
+        }
+        
         navigator.clipboard.writeText(code).then(() => toast.success('房间码已复制'));
     },
 

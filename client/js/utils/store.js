@@ -7,6 +7,7 @@ const store = {
     game: null,       // 当前游戏状态快照
     myHand: [],       // 自己的手牌
     selectedCards: [], // 已选中的牌
+    _imageCache: new Map(), // 图片预加载缓存
 
     setUser(user) { this.user = user; },
     setRoom(room) { this.room = room; },
@@ -33,5 +34,33 @@ const store = {
         this.game = null;
         this.myHand = [];
         this.selectedCards = [];
+    },
+
+    /**
+     * 预加载图片，避免首次渲染时的闪烁
+     */
+    preloadImages(cards) {
+        if (!cards) return;
+        const paths = new Set();
+        cards.forEach(card => {
+            const path = CardComponent.getImagePath(card);
+            if (!this._imageCache.has(path)) {
+                paths.add(path);
+            }
+        });
+        
+        paths.forEach(path => {
+            const img = new Image();
+            img.onload = () => this._imageCache.set(path, true);
+            img.onerror = () => this._imageCache.set(path, false);
+            img.src = path;
+        });
+    },
+
+    /**
+     * 检查图片是否已缓存
+     */
+    isImageCached(path) {
+        return this._imageCache.get(path) === true;
     },
 };
