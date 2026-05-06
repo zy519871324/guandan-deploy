@@ -166,7 +166,7 @@ const RoomView = {
         if (!code) return;
         
         // 降级方案：clipboard API 不可用时使用 textarea 复制
-        if (!navigator.clipboard) {
+        if (typeof navigator === 'undefined' || !navigator.clipboard) {
             const ta = document.createElement('textarea');
             ta.value = code;
             ta.style.position = 'fixed';
