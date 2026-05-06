@@ -34,16 +34,57 @@ const Hand = {
     },
 
     /**
-     * 设置拖拽框选
+     * 设置拖拽框选 - 框选过程中预览灰度，松开确认选择
      */
     _setupDragSelect(container, cards, onMultiSelect) {
         if (container._dragCleanup) container._dragCleanup();
 
         let dragState = null;
+        let previewSelected = new Set(); // 当前预览选中的牌
 
         const getPos = (e) => {
             const rect = container.getBoundingClientRect();
             return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        };
+
+        // 获取框选矩形内的所有牌
+        const getCardsInRect = (selRect) => {
+            const selected = [];
+            container.querySelectorAll('.card').forEach(cardEl => {
+                const cardRect = cardEl.getBoundingClientRect();
+                if (cardRect.left < selRect.right && cardRect.right > selRect.left &&
+                    cardRect.top < selRect.bottom && cardRect.bottom > selRect.top) {
+                    const cardId = cardEl.dataset.cardId;
+                    const card = cards.find(c => HandAnalyzer.cardKey(c) === cardId);
+                    if (card) selected.push(card);
+                }
+            });
+            return selected;
+        };
+
+        // 更新预览灰度
+        const updatePreview = (selRect) => {
+            const newPreview = new Set();
+            container.querySelectorAll('.card').forEach(cardEl => {
+                const cardRect = cardEl.getBoundingClientRect();
+                const inRect = cardRect.left < selRect.right && cardRect.right > selRect.left &&
+                               cardRect.top < selRect.bottom && cardRect.bottom > selRect.top;
+                if (inRect) {
+                    newPreview.add(cardEl.dataset.cardId);
+                    cardEl.classList.add('select-preview');
+                } else {
+                    cardEl.classList.remove('select-preview');
+                }
+            });
+            previewSelected = newPreview;
+        };
+
+        // 清除预览
+        const clearPreview = () => {
+            container.querySelectorAll('.card.select-preview').forEach(el => {
+                el.classList.remove('select-preview');
+            });
+            previewSelected.clear();
         };
 
         const onMouseDown = (e) => {
@@ -64,7 +105,7 @@ const Hand = {
                 Object.assign(rect.style, {
                     position: 'absolute',
                     border: '2px dashed rgba(255,255,255,0.9)',
-                    background: 'rgba(100,149,237,0.2)',
+                    background: 'rgba(100,149,237,0.15)',
                     pointerEvents: 'none',
                     zIndex: '999',
                     borderRadius: '4px',
@@ -82,6 +123,9 @@ const Hand = {
                     left: left + 'px', top: top + 'px',
                     width: w + 'px', height: h + 'px',
                 });
+                // 实时更新灰度预览
+                const selRect = dragState.rect.getBoundingClientRect();
+                updatePreview(selRect);
             }
         };
 
@@ -90,22 +134,13 @@ const Hand = {
 
             if (dragState.dragging && dragState.rect && onMultiSelect) {
                 const selRect = dragState.rect.getBoundingClientRect();
-                const selected = [];
-                container.querySelectorAll('.card').forEach(cardEl => {
-                    const cardRect = cardEl.getBoundingClientRect();
-                    if (cardRect.left < selRect.right && cardRect.right > selRect.left &&
-                        cardRect.top < selRect.bottom && cardRect.bottom > selRect.top) {
-                        const cardId = cardEl.dataset.cardId;
-                        const card = cards.find(c => HandAnalyzer.cardKey(c) === cardId);
-                        if (card) selected.push(card);
-                    }
-                });
+                const selected = getCardsInRect(selRect);
                 if (selected.length > 0) onMultiSelect(selected);
             }
 
             if (dragState.rect) dragState.rect.remove();
-            // 延迟清除 dragState：鼠标松开后会立即触发 click 事件，
-            // 若在此处同步置 null，suppressClick 将无法拦截多余的牌点击
+            clearPreview();
+            
             if (dragState.dragging) {
                 setTimeout(() => { dragState = null; }, 0);
             } else {
@@ -131,6 +166,7 @@ const Hand = {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
             if (dragState && dragState.rect) dragState.rect.remove();
+            clearPreview();
             dragState = null;
         };
     },

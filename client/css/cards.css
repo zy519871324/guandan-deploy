@@ -31,7 +31,10 @@
 }
 
 .card:hover { transform: translateY(-6px); box-shadow: 2px 6px 14px rgba(0,0,0,0.55); }
-.card.selected { position: relative; top: -8px; box-shadow: 0 4px 20px rgba(233,69,96,0.6); }
+.card.selected { filter: brightness(0.6) grayscale(0.4); box-shadow: 0 0 12px rgba(245,166,35,0.8); outline: 2px solid var(--color-accent); }
+
+/* 框选预览灰度 */
+.card.select-preview { filter: brightness(0.6) grayscale(0.4); box-shadow: 0 0 8px rgba(100,149,237,0.6); outline: 1px dashed rgba(100,149,237,0.8); }
 
 /* 当前级牌高亮（非红桃） */
 .card.level-card { outline: 2px solid var(--color-accent); box-shadow: 0 0 10px rgba(245,166,35,0.5); }

@@ -475,6 +475,7 @@ function handleRoundEnd(io, gameId, roomCode, gameState) {
             roundNumber: newGameState.roundNumber,
             teamALevel: newGameState.teamALevel,
             teamBLevel: newGameState.teamBLevel,
+            firstPlayer: newGameState.currentPlayer,
         });
 
         broadcastState(io, roomCode, newGameState);

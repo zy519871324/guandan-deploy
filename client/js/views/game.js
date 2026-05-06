@@ -239,7 +239,20 @@ const GameView = {
         // 更新等级显示
         document.getElementById('level-team-a').textContent = `A队: ${data.teamALevel}`;
         document.getElementById('level-team-b').textContent = `B队: ${data.teamBLevel}`;
-        toast.info(`第${data.roundNumber}局开始`, 2000);
+        
+        // 显示第一出牌人提示（持有黑桃2的玩家先出牌）
+        const firstPlayer = data.firstPlayer || data.currentPlayer;
+        if (firstPlayer) {
+            const player = this._state?.players?.find(p => p.id === firstPlayer);
+            const name = player?.username || '玩家';
+            if (firstPlayer === store.user?.id) {
+                toast.info(`第${data.roundNumber}局开始，你持有黑桃2，请先出牌`, 3000);
+            } else {
+                toast.info(`第${data.roundNumber}局开始，${name} 持有黑桃2，先出牌`, 3000);
+            }
+        } else {
+            toast.info(`第${data.roundNumber}局开始`, 2000);
+        }
     },
 
     _onGameEnd(data) {
